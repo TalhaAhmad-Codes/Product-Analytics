@@ -1,4 +1,5 @@
 ﻿using ProductAnalytics.DTOs.CommonDTOs;
+using ProductAnalytics.Utils;
 
 namespace ProductAnalytics.DTOs.UserDTOs.UserUpdateDtos
 {
@@ -9,7 +10,12 @@ namespace ProductAnalytics.DTOs.UserDTOs.UserUpdateDtos
 
     public sealed class UserUpdateUsernameDto : BaseDto
     {
-        public string Username { get; init; }
+        private string username;
+        public string Username
+        {
+            get => username;
+            init => username = Misc.Simplify(value);
+        }
     }
 
     public sealed class UserUpdatePasswordDto : BaseDto

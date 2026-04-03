@@ -5,7 +5,7 @@ namespace ProductAnalytics.Models
 {
     public sealed class User : BaseEntity
     {
-        public byte[]? ProfilePicture { get; set; }
+        public byte[]? ProfilePicture { get; set; } = null;
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public Role Role { get; set; }
