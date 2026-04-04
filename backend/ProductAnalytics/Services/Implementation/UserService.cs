@@ -134,6 +134,12 @@ namespace ProductAnalytics.Services.Implementation
             var user = await context.Users.FindAsync(dto.Id)
                 ?? throw new DomainException("User not found!");
 
+            // Check uniqueness
+            bool exists = await ExistsByUsernameAsync(dto.Username);
+
+            if (exists)
+                throw new DomainException("A user of same name is already registered.");
+
             // Update the username
             user.Username = dto.Username;
 

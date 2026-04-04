@@ -98,6 +98,15 @@ namespace ProductAnalytics.Services.Implementation
             var product = await context.Products.FindAsync(dto.Id)
                 ?? throw new DomainException("Product not found!");
 
+            // Against duplicate name
+            if (product.Name != dto.Name)
+            {
+                bool exists = await ExistsByNameAsync(dto.Name);
+
+                if (exists)
+                    throw new DomainException($"The porduct of name '{dto.Name}' already exists.");
+            }
+
             // Update the product
             product.Image = dto.Image;
             product.Name = dto.Name;

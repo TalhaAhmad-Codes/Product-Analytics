@@ -104,6 +104,15 @@ namespace ProductAnalytics.Services.Implementation
             var log = await context.Logs.FindAsync(dto.Id)
                 ?? throw new DomainException("The log not found!");
 
+            // Check for duplicate
+            if (log.ProductId != dto.ProductId && log.SellDate != dto.SellDate)
+            {
+                bool exists = await ExistsByProductAndSellDateAsync(dto.ProductId, dto.SellDate);
+
+                if (exists)
+                    throw new DomainException($"This product has already contain logs at date '{dto.SellDate}'.");
+            }
+
             // Update the log
             log.ProductId = dto.ProductId;
             log.SellDate = dto.SellDate;
