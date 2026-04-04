@@ -167,3 +167,6 @@ secrets.json
 *.key
 *.pem
 *.crt
+
+*.csv
+*.db
