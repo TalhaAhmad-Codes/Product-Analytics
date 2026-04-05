@@ -48,7 +48,7 @@ namespace ProductAnalytics.Services.Implementation
         public async Task<bool> ExistsByUsernameAsync(string username)
         {
             int count = await context.Users.AsQueryable()
-                .Where(u => u.Username == username)
+                .Where(u => u.Username.ToLower() == username.ToLower())
                 .CountAsync();
 
             return count > 0;
@@ -57,17 +57,18 @@ namespace ProductAnalytics.Services.Implementation
         public async Task<PagedResultDto<UserResponseDto>> GetAllAsync(UserFilterDto filterDto)
         {
             var query = context.Users.AsQueryable();
+            filterDto.NormalizePagination();    // Remove nulls
 
             // Applying Filters
             if (filterDto.UserName != null)
-                query = query.Where(u => u.Username == filterDto.UserName);
+                query = query.Where(u => u.Username.ToLower() == filterDto.UserName.ToLower());
 
             if (filterDto.Role.HasValue)
                 query = query.Where(u => u.Role == filterDto.Role);
 
             // Getting paged result
             var totalCount = await query.CountAsync();
-            var items = await Misc.GetPagedResultAsync<User>(query, filterDto.PageNumber, filterDto.PageSize);
+            var items = await Misc.GetPagedResultAsync<User>(query, filterDto.PageNumber!.Value, filterDto.PageSize!.Value);
 
             // Returning the result
             return new PagedResultDto<UserResponseDto>

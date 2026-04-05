@@ -1,5 +1,6 @@
 ﻿using ProductAnalytics.Enums;
 using ProductAnalytics.Utils;
+using System.ComponentModel;
 
 namespace ProductAnalytics.DTOs.UserDTOs
 {
@@ -7,11 +8,12 @@ namespace ProductAnalytics.DTOs.UserDTOs
     {
         private string username;
 
-        public byte[]? ProfilePic { get; init; }
+        [DefaultValue(null)]
+        public byte[]? ProfilePic { get; set; } = null;
         public string Username
         {
             get => username;
-            init => username = Misc.Simplify(value);
+            init => username = Misc.Simplify(value, false);
         }
         public string Password { get; init; }
         public Role Role { get; init; }

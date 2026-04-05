@@ -52,6 +52,7 @@ namespace ProductAnalytics.Services.Implementation
         public async Task<PagedResultDto<LogsResponseDto>> GetAllAsync(LogsFilterDto filterDto)
         {
             var query = context.Logs.AsQueryable();
+            filterDto.NormalizePagination();    // Remove nulls
 
             // Applying filters
             if (filterDto.ProductId.HasValue)
@@ -71,7 +72,7 @@ namespace ProductAnalytics.Services.Implementation
 
             // Get paged result
             var totalCount = await query.CountAsync();
-            var items = await Misc.GetPagedResultAsync<Logs>(query, filterDto.PageNumber, filterDto.PageSize);
+            var items = await Misc.GetPagedResultAsync<Logs>(query, filterDto.PageNumber!.Value, filterDto.PageSize!.Value);
 
             return new PagedResultDto<LogsResponseDto>
             {

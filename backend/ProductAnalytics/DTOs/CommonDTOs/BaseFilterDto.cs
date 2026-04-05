@@ -2,7 +2,16 @@
 {
     public abstract class BaseFilterDto
     {
-        public int PageNumber { get; init; } = 1;
-        public int PageSize { get; init; } = 10;
+        public int? PageNumber { get; set; }
+        public int? PageSize { get; set; }
+
+        public void NormalizePagination()
+        {
+            PageNumber ??= 1;
+            PageSize ??= 10;
+
+            if (PageNumber <= 0) PageNumber = 1;
+            if (PageSize <= 0) PageSize = 10;
+        }
     }
 }

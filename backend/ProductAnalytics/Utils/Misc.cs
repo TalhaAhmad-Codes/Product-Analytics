@@ -6,9 +6,6 @@ namespace ProductAnalytics.Utils
     {
         public static async Task<List<T>> GetPagedResultAsync<T>(IQueryable<T> query, int pageNumber, int pageSize) where T : class
         {
-            pageNumber = Math.Max(pageNumber, 1);
-            pageSize = Math.Max(pageSize, 1);
-
             return await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
