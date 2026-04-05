@@ -28,6 +28,7 @@ namespace ProductAnalytics.Data.Configurations
             /* Price - Config */
             builder.Property(p => p.Price)
                    .HasColumnName("Price")
+                   .HasPrecision(18, 2)
                    .IsRequired();
 
             /* Stock Status - Config */

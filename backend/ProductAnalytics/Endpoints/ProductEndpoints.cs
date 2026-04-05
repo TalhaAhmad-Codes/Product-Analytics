@@ -6,7 +6,7 @@ namespace ProductAnalytics.Endpoints
 {
     public static class ProductEndpoints
     {
-        public static void MapUserEndpoints(this IEndpointRouteBuilder app)
+        public static void MapProductEndpoints(this IEndpointRouteBuilder app)
         {
             var group = app.MapGroup("/api/products");
 

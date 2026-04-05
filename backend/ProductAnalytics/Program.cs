@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using ProductAnalytics.Data;
+using ProductAnalytics.Endpoints;
+using ProductAnalytics.Services.Implementation;
+using ProductAnalytics.Services.Interfaces;
 
 namespace ProductAnalytics
 {
@@ -10,15 +13,25 @@ namespace ProductAnalytics
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add database context
             builder.Services.AddDbContext<ProductAnalyticsDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // Services
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<ILogsService, LogsService>();
+
+            // Configs
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            // Endpoints
+            app.MapUserEndpoints();
+            app.MapProductEndpoints();
+            app.MapLogsEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
