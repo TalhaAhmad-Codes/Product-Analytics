@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using ProductAnalytics.Data;
 using ProductAnalytics.DTOs.CommonDTOs;
 using ProductAnalytics.DTOs.LogsDTOs;
@@ -21,6 +20,9 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<LogsResponseDto> CreateAsync(LogsCreateDto dto)
         {
+            Guard.AgainstNegative(dto.Quantity, "Quantity");
+            Guard.AgainstZeroOrLess(dto.ProductId, "Product Id");
+
             // Check for duplicates
             bool exists = await ExistsByProductAndSellDateAsync(dto.ProductId, dto.SellDate);
 
@@ -56,19 +58,43 @@ namespace ProductAnalytics.Services.Implementation
 
             // Applying filters
             if (filterDto.ProductId.HasValue)
+            {
+                Guard.AgainstZeroOrLess(filterDto.ProductId.Value, "Product Id");
                 query = query.Where(l => l.ProductId == filterDto.ProductId);
+            }
 
             if (filterDto.FromSellDate.HasValue)
                 query = query.Where(l => l.SellDate >= filterDto.FromSellDate);
 
             if (filterDto.ToSellDate.HasValue)
+            {
+                if (filterDto.FromSellDate.HasValue)
+                {
+                    if (filterDto.ToSellDate < filterDto.FromSellDate)
+                        throw new DomainException("Selected date is invalid for starting range.");
+                }
+
                 query = query.Where(l => l.SellDate <= filterDto.ToSellDate);
+            }
 
             if (filterDto.MinQuantity.HasValue)
+            {
+                Guard.AgainstNegative(filterDto.MinQuantity.Value, "Minimum Quantity");
                 query = query.Where(l => l.Quantity >= filterDto.MinQuantity);
+            }
 
             if (filterDto.MaxQuantity.HasValue)
+            {
+                Guard.AgainstNegative(filterDto.MaxQuantity.Value, "Maximum Quantity");
+
+                if (filterDto.MinQuantity.HasValue)
+                {
+                    if (filterDto.MaxQuantity < filterDto.MinQuantity)
+                        throw new DomainException($"Selected quantity range is invalid ({filterDto.MinQuantity}, {filterDto.MaxQuantity})");
+                }
+
                 query = query.Where(l => l.Quantity <= filterDto.MaxQuantity);
+            }
 
             // Get paged result
             var totalCount = await query.CountAsync();
@@ -83,12 +109,16 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<LogsResponseDto?> GetByIdAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
+
             var log = await context.Logs.FindAsync(id);
             return log is null ? null : LogsMapper.ToDto(log);
         }
 
         public async Task<bool> RemoveAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
+
             var log = await context.Logs.FindAsync(id);
 
             if (log is null)
@@ -102,6 +132,10 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<LogsResponseDto> UpdateAsync(LogsUpdateDto dto)
         {
+            Guard.AgainstZeroOrLess(dto.Id, "Id");
+            Guard.AgainstNegative(dto.Quantity, "Quantity");
+            Guard.AgainstZeroOrLess(dto.ProductId, "Product Id");
+
             var log = await context.Logs.FindAsync(dto.Id)
                 ?? throw new DomainException("The log not found!");
 

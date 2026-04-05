@@ -20,6 +20,10 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<ProductResponseDto> CreateAsync(ProductCreateDto dto)
         {
+            Guard.AgainstNullOrWhitespace(dto.Name, "Name");
+            Guard.AgainstZeroOrLess(dto.Price, "Price");
+            Guard.AgainstInvalidRange(0, 1, (int)dto.StockStatus, "Stock status");
+
             // Product already exists!
             bool exists = await ExistsByNameAsync(dto.Name);
 
@@ -57,13 +61,22 @@ namespace ProductAnalytics.Services.Implementation
 
             // Applying filters
             if (filterDto.MinPrice.HasValue)
+            {
+                Guard.AgainstZeroOrLess(filterDto.MinPrice.Value, "Minimum Price");
                 query = query.Where(p => p.Price >= filterDto.MinPrice.Value);
+            }
 
             if (filterDto.MaxPrice.HasValue)
+            {
+                Guard.AgainstZeroOrLess(filterDto.MaxPrice.Value, "Maximum Price");
                 query = query.Where(p => p.Price <= filterDto.MaxPrice.Value);
+            }
 
             if (filterDto.StockStatus.HasValue)
+            {
+                Guard.AgainstInvalidRange(0, 1, (int)filterDto.StockStatus.Value, "Stock status");
                 query = query.Where(p => p.StockStatus == filterDto.StockStatus);
+            }
 
             // Get paged result
             var totalCount = await query.CountAsync();
@@ -78,12 +91,14 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<ProductResponseDto?> GetByIdAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
             var product = await context.Products.FindAsync(id);
             return product is null ? null : ProductMapper.ToDto(product);
         }
 
         public async Task<bool> RemoveAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
             var product = await context.Products.FindAsync(id);
 
             if (product is null)
@@ -96,6 +111,11 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<ProductResponseDto> UpdateAsync(ProductUpdateDto dto)
         {
+            Guard.AgainstZeroOrLess(dto.Id, "Id");
+            Guard.AgainstNullOrWhitespace(dto.Name, "Name");
+            Guard.AgainstZeroOrLess(dto.Price, "Price");
+            Guard.AgainstInvalidRange(0, 1, (int)dto.StockStatus, "Stock status");
+
             var product = await context.Products.FindAsync(dto.Id)
                 ?? throw new DomainException("Product not found!");
 

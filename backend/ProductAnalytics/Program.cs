@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ProductAnalytics.Data;
 using ProductAnalytics.Endpoints;

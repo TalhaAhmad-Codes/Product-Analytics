@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductAnalytics.Data;
+using ProductAnalytics.Data.LengthLimits;
 using ProductAnalytics.DTOs.CommonDTOs;
 using ProductAnalytics.DTOs.UserDTOs;
 using ProductAnalytics.DTOs.UserDTOs.UserUpdateDtos;
@@ -21,6 +22,11 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<UserResponseDto> CreateAsync(UserCreateDto dto)
         {
+            // Guard against invalid data
+            Guard.AgainstNullOrWhitespace(dto.Username, "Username");
+            Guard.AgainstInvalidMinimumLength(dto.Password, Minimum.Password, "Password");
+            Guard.AgainstInvalidRange(0, 1, (int) dto.Role, "Role");
+
             bool alreadyExists = await ExistsByUsernameAsync(dto.Username);
 
             if (alreadyExists)
@@ -60,11 +66,17 @@ namespace ProductAnalytics.Services.Implementation
             filterDto.NormalizePagination();    // Remove nulls
 
             // Applying Filters
-            if (filterDto.UserName != null)
-                query = query.Where(u => u.Username.ToLower() == filterDto.UserName.ToLower());
+            if (filterDto.Username != null)
+            {
+                Guard.AgainstNullOrWhitespace(filterDto.Username, "Username");
+                query = query.Where(u => u.Username.ToLower() == filterDto.Username.ToLower());
+            }
 
             if (filterDto.Role.HasValue)
+            {
+                Guard.AgainstInvalidRange(0, 1, (int)filterDto.Role, "Role");
                 query = query.Where(u => u.Role == filterDto.Role);
+            }
 
             // Getting paged result
             var totalCount = await query.CountAsync();
@@ -80,12 +92,16 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<UserResponseDto?> GetByIdAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
+
             var user = await context.Users.FindAsync(id);
             return user is null ? null : UserMapper.ToDto(user);
         }
 
         public async Task<bool> RemoveAsync(int id)
         {
+            Guard.AgainstZeroOrLess(id, "Id");
+
             var user = await context.Users.FindAsync(id);
 
             // User not found!
@@ -99,6 +115,12 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<UserResponseDto> UpdatePasswordAsync(UserUpdatePasswordDto dto)
         {
+            // Guard against invalid data
+            Guard.AgainstZeroOrLess(dto.Id, "Id");
+            Guard.AgainstInvalidMinimumLength(dto.OldPassword, Minimum.Password, "Password (Old)");
+            Guard.AgainstInvalidMinimumLength(dto.NewPassword, Minimum.Password, "Password (New)");
+            Guard.AgainstInvalidMinimumLength(dto.ConfirmPassword, Minimum.Password, "Password (Confirm)");
+
             var user = await context.Users.FindAsync(dto.Id)
                 ?? throw new DomainException("User not found!");
 
@@ -119,6 +141,7 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<UserResponseDto> UpdateProfilePictureAsync(UserUpdateProfilePictureDto dto)
         {
+            Guard.AgainstZeroOrLess(dto.Id, "Id");
             var user = await context.Users.FindAsync(dto.Id)
                 ?? throw new DomainException("User not found!");
 
@@ -132,6 +155,10 @@ namespace ProductAnalytics.Services.Implementation
 
         public async Task<UserResponseDto> UpdateUsernameAsync(UserUpdateUsernameDto dto)
         {
+            // Guard against invalid data
+            Guard.AgainstZeroOrLess(dto.Id, "Id");
+            Guard.AgainstNullOrWhitespace(dto.Username, "Username");
+
             var user = await context.Users.FindAsync(dto.Id)
                 ?? throw new DomainException("User not found!");
 
