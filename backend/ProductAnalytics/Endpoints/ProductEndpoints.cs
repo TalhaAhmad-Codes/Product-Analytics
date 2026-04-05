@@ -11,14 +11,19 @@ namespace ProductAnalytics.Endpoints
             var group = app.MapGroup("/api/products");
 
             // Endpoints
-            group.MapGet("/", GetAllAsync);
-            group.MapGet("/{id:int}", GetByIdAsync);
+            group.MapGet("/", GetAllAsync)
+                 .RequireAuthorization();
+            group.MapGet("/{id:int}", GetByIdAsync)
+                 .RequireAuthorization();
 
-            group.MapPost("/", CreateAsync);
+            group.MapPost("/", CreateAsync)
+                 .RequireAuthorization("Admin");
 
-            group.MapPut("/", UpdateAsync);
+            group.MapPut("/", UpdateAsync)
+                 .RequireAuthorization("Admin");
 
-            group.MapDelete("/{id:int}", RemoveAsync);
+            group.MapDelete("/{id:int}", RemoveAsync)
+                 .RequireAuthorization("Admin");
         }
 
         /*/ <----- Handlers -----> /*/

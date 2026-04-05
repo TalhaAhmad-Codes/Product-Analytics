@@ -12,16 +12,23 @@ namespace ProductAnalytics.Endpoints
             var group = app.MapGroup("/api/users");
 
             // Endpoints
-            group.MapGet("/", GetAllUsersAsync);
-            group.MapGet("/{id:int}", GetByIdAsync);
+            group.MapGet("/", GetAllUsersAsync)
+                 .RequireAuthorization();
+            group.MapGet("/{id:int}", GetByIdAsync)
+                 .RequireAuthorization("Admin");
 
-            group.MapPost("/", CreateAsync);
+            group.MapPost("/", CreateAsync)
+                 .RequireAuthorization("Admin");
 
-            group.MapPatch("/update/profile-pic", UpdateProfilePictureAsync);
-            group.MapPatch("/update/username", UpdateUsernameAsync);
-            group.MapPatch("/update/password", UpdatePasswordAsync);
+            group.MapPatch("/update/profile-pic", UpdateProfilePictureAsync)
+                 .RequireAuthorization();
+            group.MapPatch("/update/username", UpdateUsernameAsync)
+                 .RequireAuthorization();
+            group.MapPatch("/update/password", UpdatePasswordAsync)
+                 .RequireAuthorization();
 
-            group.MapDelete("/{id:int}", RemoveAsync);
+            group.MapDelete("/{id:int}", RemoveAsync)
+                 .RequireAuthorization("Admin");
         }
 
         /*/ <----- Handlers -----> /*/
