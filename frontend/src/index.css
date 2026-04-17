@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Optional: Add a smooth font-smoothing for that professional look */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f1f5f9; /* Matches the dashboard background */
+}
+
